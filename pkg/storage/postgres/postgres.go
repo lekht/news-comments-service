@@ -33,18 +33,18 @@ func (p *Postgres) Close() {
 	}
 }
 
-func (p *Postgres) CommentsByNewsID(id int) (*[]storage.Comment, error) {
-	var comments []storage.Comment
+func (p *Postgres) CommentsByNewsID(id int) ([]*storage.Comment, error) {
+	var comments []*storage.Comment
 	rows, err := p.pool.Query(context.Background(), `
 		SELECT 
 			id,
-			parent_id,
 			news_id,
+			parent_id,
 			msg,
 			pubTime
 		FROM comments.messages
 		WHERE news_id = $1
-		ORDER BY pub_time DESC;
+		ORDER BY pubTime DESC;
 		`,
 		id,
 	)
@@ -61,7 +61,7 @@ func (p *Postgres) CommentsByNewsID(id int) (*[]storage.Comment, error) {
 			return nil, err
 		}
 
-		comments = append(comments, comment)
+		comments = append(comments, &comment)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -70,7 +70,7 @@ func (p *Postgres) CommentsByNewsID(id int) (*[]storage.Comment, error) {
 		}
 		return nil, err
 	}
-	return &comments, nil
+	return comments, nil
 
 }
 

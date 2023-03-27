@@ -5,13 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/lekht/news-comments-service/config"
-	"github.com/lekht/news-comments-service/pkg/storage"
 )
-
-type store interface {
-	CommentsByNewsID(id int) (*[]storage.Comment, error)
-	AddComment(c *storage.Comment) error
-}
 
 type API struct {
 	r  *mux.Router
@@ -20,7 +14,8 @@ type API struct {
 
 // Регистрация методов в маршрутизаторе
 func (a *API) endpoints() {
-	a.r.Name("comments").Path("/comment").Methods(http.MethodPost).HandlerFunc(a.commentsByIDHandler)
+	a.r.Use(a.accessMiddleware, a.requestIdMiddlware, a.logRequestMiddlware)
+	a.r.Name("comments").Path("/comment").Methods(http.MethodGet).HandlerFunc(a.commentsByIDHandler)
 	a.r.Name("add_comment").Path("/comment").Methods(http.MethodPost).HandlerFunc(a.addCommentHandler)
 }
 
